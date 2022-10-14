@@ -1,0 +1,149 @@
+#Example 1: Ansible playbook to install multiple software using single tasks
+---
+ - name: play_1
+   hosts: all
+   tasks:
+     - name: Install git 
+       become: true
+       apt:
+         name: git
+         state: present
+         update_cache: yes
+     - name: Install jq
+       become: true
+       apt:
+         name: jq
+         state: latest
+         update_cache: yes
+
+
+#Example 2: Ansible playbook to install multiple software using single task with looping (Method 1)
+
+---
+ - name: play_2
+   hosts: all
+   tasks:
+     - name: Install multiple softwares
+       become: true
+       apt: 
+         name: "{{ item }}"
+         state: present
+         update_cache: yes
+       with_items:                
+           - git
+           - nginx
+           - memcached
+           - jq
+           - curl
+           - wget
+          
+
+# Example 3: Ansible playbook to install multiple software using single task with looping (Method 1)
+---
+ - name: play_3
+   hosts: all
+   tasks:
+     - name: Install multiple softwares
+       become: true
+       apt: 
+         name: [git, nginx, memcached, jq, curl, wget]
+         state: present
+         update_cache: yes      
+
+
+# Example 4: Ansible playbook to execute tasks using conditions. (when, only_if)
+
+---
+  - name: play_4
+    hosts: all
+    tasks:
+      - name: Install git
+        become: true
+        apt:
+          name: git
+          state: present
+          update_cache: yes
+        when: 
+             - ansible_distribution == "Ubuntu"  
+             - ansible_pkg_mgr == "apt"
+
+      - name: Install git
+        become: true
+        yum:
+          name: git
+          state: present
+          update_cache: yes
+        when: 
+             - ansible_distribution == "Redhat"  
+             - ansible_pkg_mgr == "yum"
+      
+ 
+Ansible facts, Ansible Looping, Ansible Conditions, Multiple tasks
+
+
+#Example: 5 Ansible playbook to create directory and install software
+
+---
+ - name: play_6
+   hosts: backend
+   tasks:
+     - name: create directory
+       become: true
+       file:
+         path: /etc/ec2-user/test
+         state: directory
+          
+     - name: Install git
+       become: true
+       yum:
+         name: git
+         state: present
+         update_cache: yes
+
+
+#Example: 6 Ansible playbook to install software, start and get the status of that software
+
+---
+ - name: play_7
+   hosts: backend
+   tasks:
+    - name: install tomcat
+      become: true
+      yum:
+       name:tomcat
+       state: latest
+    - name: start the tomcat
+      become: true 
+      service:
+         name: tomcat
+         state: start
+    - name: status of tomcat
+      service:
+         name: tomcat
+         state: status
+
+    - name: install tomcat
+      apt: 
+        name: tomcat
+        state: latest
+    - name: start tomcat
+      become: true
+      systemctl:
+          name: tomcat
+          state: start
+     - name: status tomcat
+       systemctl:
+           name: tomcat
+           state: status
+
+#Exmaple 7: Ansible playbook to install single software
+---
+ - name: play_1
+   hosts: all
+   tasks:
+     - name: Install git
+       become: true
+       apt:
+         name: git
+         state: present 
+         update_cache: yes

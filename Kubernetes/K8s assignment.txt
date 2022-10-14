@@ -1,0 +1,64 @@
+Q1--->How to use custom images / connect to a registry through k8s 
+	1. Login to the docker hub account 
+		  docker login 
+	2. Create a app to print ip 
+			using flask 
+	3. 	push the image to your registry 
+	4 use the above custom image in k8s spec file.
+	
+		image: <username>/<regirty_name>:<tag>
+		imagePullPolicy: IfNotPresent
+		
+	5. Create a service of type NodePort attaching the above pods 
+ 122  vi ip_app.py
+  123  vi Dockerfile
+  124  vi requirements.txt
+  136  sudo docker build -t k8s_ip:latest .
+  138  sudo docker images
+  142  sudo docker tag k8s_ip:latest mjgowda123/k8s_ip:latest
+  145  sudo docker push mjgowda123/k8s_ip
+  151  sudo vi deployment.yml
+----------------------deployment.yml-------------------------
+        apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ip-app-deployment
+  labels:
+    app: ip-nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ip-app
+  template:
+    metadata:
+      labels:
+        app: ip-app
+    spec:
+      containers:
+      - name: ipapp
+        image: mjgowda123/k8s_ip:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+---------------------------------------------------------------------
+  152  kubectl apply -f deployment.yml
+  153  kubectl get pods
+  165  sudo vi nodeport_dock.yml
+------------------nodeport_dock.yml--------------------------------
+	apiVersion: v1
+kind: Service
+metadata:
+  name: ip-svc
+spec:
+  type: NodePort
+  selector:
+      app: ip-app
+  ports:
+    - name: http
+      nodePort: 30081
+      port: 8081
+      targetPort: 80
+---------------------------------------------------------------------
+  168  kubectl apply -f nodeport_dock.yml
+  169  kubectl get svc

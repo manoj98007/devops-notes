@@ -1,0 +1,88 @@
+Ansible Register - stores the output of previous task in a variable in JSON format
+
+#Ansible playbook for register and debug
+---
+ - name: play_5
+   hosts: all
+   tasks:
+     - name: install git
+       become: true
+       apt:
+          name: git
+          state: present
+          update_cache: yes
+       when: 
+             - ansible_distribution == "Ubuntu"  
+             - ansible_pkg_mgr == "apt"
+       register: result
+     - name: print debug message
+       debug:
+          var: result
+          verbosity: 0
+
+#Ansible playbook to execute specific task using tags.
+
+ 
+- name: play_5
+   hosts: all
+   tasks:
+     - name: install git
+       become: true
+       apt:
+          name: git
+          state: present
+          update_cache: yes
+       tags:
+          - gitpkg
+  
+     - name: install jq
+       become: true
+       apt:
+          name: jq
+          state: latest
+          update_cache: yes
+       tags:
+         - jqpkg
+  
+     - name: install wget
+       become: true
+       apt:
+          name: wget
+          state: latest
+          update_cache: yes
+       tags:
+          - wgetpkg
+
+
+ansible-playbook <name of playbook> --tags="tagname" 
+
+ansible-playbook <name of playbook> --tags="tagname1,tagname2" 
+
+ansible-playbook <name of playbook> --skip-tags="tagname" 
+
+
+ansible-playbook <name of playbook> --tags="wgetpkg"  //executes only wget task
+
+ansible-playbook <name of playbook> --skip-tags="gitpkg"  //executes all tasks except git
+
+Ansible Variables
+
+---
+ - name: variables
+   hosts: "{{ hostname }}"
+   vars:
+     hostname:all
+   vars:
+     str: Hello
+   vars:
+     name: [git, wget]
+   tasks:
+     - name: Variable usage
+       debug:
+         msg: "{{ str }}"
+        apt:
+         name: "{{ name }}"
+       
+
+
+ansible-playbook file.yaml --extra-var str=hi
