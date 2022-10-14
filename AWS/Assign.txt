@@ -1,0 +1,58 @@
+#!/bin/bash
+
+grep '^NAME' /etc/os-release | grep -i "RED"
+if [ $? -eq 0 ];then
+ sudo yum install tree && sudo yum install git && sudo yum install zip
+else
+ sudo apt install tree && sudo apt install git && sudo apt install zip
+fi
+============================================================================
+
+1) Best practices to help secure your AWS resources
+Create a strong password for your AWS resources. ...
+Use a group email alias with your AWS account. ...
+Enable multi-factor authentication. ...
+Set up AWS IAM users, groups, and roles for daily account access. ...
+Delete your account's access keys. ...
+Enable CloudTrail in all AWS regions
+==============================================================================
+2.steps to increase ebs volume
+Increase the size of EBS volume in your EC2 instance
+If you are familiar with Amazon EC2 and EBS volume, you might have experiences modifying the size of EBS volume. AWS provide an easy way to increase the size of your EBS volume. In fact, we could increase it without detaching the volume or restarting the instance. That’s quite a nice work done there because we would not need to have a downtime for our instance.
+
+Let’s exercise. Assume we have volume name my-volume.
+
+Create snapshot
+It is best practice to create a snapshot of your volume in case something bad happens.
+
+Go to your EBS volume list from your EC2 Dashboard.
+Right click the volume.
+Click Create Snapshot link.
+Add the description value snapshot-my-volume.
+Add key : Name and value : snapshot-my-volume.
+Click button Create Snapshot.
+Go grab some snack while it is in progress.
+
+Increase the volume
+This is how we will increase the volume size. Make sure your snapshot is finished.
+
+Let’s assume that previous volume size is 30GB and we want increase it to 40GB.
+
+Right click on the volume you wish to increase.
+Add your desired size; In our example type 40.
+Click Modify.
+You will get confirmation to extend OS file system.
+Click Yes.
+Extending OS file system
+After you finish modifying volume, you need to extend OS file system in order to see your increased volume size. The example below is the command I used for Ubuntu OS.
+
+SSH into you instance.
+Type df -h to check volume size; You will still have 30GB of volume size.
+Type lsblk ; Your increased volume will be shown just above your current volume, e.g. xvda1 is your current volume with 30GB size and xvda with 40GB size.
+Extend the partition by typing sudo growpart /dev/xvda 1 ; Note that dev/xvda is the partition name and 1 is the partition number.
+Extend the volume by typing sudo resize2fs /dev/xvda1 .
+Type df -h to check volume size; It will show 40GB of volume size.
+
+1.sudo growpart /dev/xvda 1
+2.sudo resize2fs /dev/xvda1
+3. df -TH
